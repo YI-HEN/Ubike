@@ -1,11 +1,8 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { Ubike } from '../models/ubike';
-import { AppBar, Autocomplete, Box, Button, Checkbox, Container, Drawer, FormControl, FormControlLabel, Grid, Hidden, IconButton, InputLabel, List, ListItem, ListItemText, MenuItem, Select, SelectChangeEvent, TextField, Toolbar, Typography, tablePaginationClasses } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import DehazeIcon from '@mui/icons-material/Dehaze';
+import { Autocomplete, Box, Button, Checkbox, Container, FormControl, FormControlLabel, Grid, Hidden, IconButton, InputLabel, MenuItem, Select, SelectChangeEvent, TextField, Typography } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import CancelIcon from '@mui/icons-material/Cancel';
-import { Link, useLocation } from 'react-router-dom';
 
 
 
@@ -13,7 +10,7 @@ interface Props {
     data: Ubike[];
 }
 
-export default function Page4({ data }: Props) {
+export default function Stop({ data }: Props) {
     const taipei = ["松山區", "大安區", "大同區", "中山區", "內湖區", "南港區",
         "士林區", "北投區", "信義區", "中正區", "萬華區", "文山區", "臺大公館校區"]
     const taiwan = ['臺北市', '新北市', '桃園市', '臺中市', '臺南市', '高雄市',
@@ -23,24 +20,14 @@ export default function Page4({ data }: Props) {
     const [selectAll, setSelectAll] = useState<boolean>(false);
     const [selectArea, setSelectArea] = useState<string>("");
     const [selectTown, setSelectTown] = useState<boolean[]>(Array(taipei.length).fill(false));
-    const [selectedDistricts, setSelectedDistricts] = useState<string[]>([]);
     const [newData, setNewData] = useState<any[]>([]);
-    const location = useLocation();
-    const [currentRoute, setCurrentRoute] = useState<string>("")
 
     useEffect(() => {
-        const newSelectedDistricts = taipei.filter((district, index) => selectTown[index]);
-        setSelectedDistricts(newSelectedDistricts);
+        const newSelectedDistricts = taipei.filter((_, index) => selectTown[index]);
         const updateData = data.filter(item => newSelectedDistricts.includes(item.sarea));
-        setNewData(updateData); 
+        setNewData(updateData);
     }, [selectTown]);
-    useEffect(() => {
-        setCurrentRoute(location.pathname);
-    },[location])
 
-    const handleClick = () => {
-        setMenuOpen(!menuOpen);
-    }
     const handleChange = (event: SelectChangeEvent<typeof selectArea>) => {
         setSelectArea(event.target.value);
     }
@@ -56,7 +43,7 @@ export default function Page4({ data }: Props) {
         const newSelectTown = [...selectTown];
         newSelectTown[index] = !newSelectTown[index];
         setSelectTown(newSelectTown);
-        if (newSelectTown.some(a => a === false)){
+        if (newSelectTown.some(a => a === false)) {
             setSelectAll(false);
         }
     }
@@ -88,116 +75,7 @@ export default function Page4({ data }: Props) {
     }
 
     return (
-        <Box sx={{ paddingLeft: { xs: 5, md: 12 }, paddingRight: { xs: 5, md: 12 } }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', p: 2, height: 50 }}>
-                <AppBar position="static" color="transparent" elevation={0}>
-                    <Toolbar>
-                        <Box sx={{ mr: 2 }}>
-                            <img src={'/logo.png'} alt="Logo" style={{ height: 100 }} />
-                        </Box>
-                        <Hidden mdDown>
-                            <Button component={Link} to='/instructions' sx={{ color: currentRoute === '/instructions' ? '#B5CC22' : '#467500', border: 'none', mr: 2, fontWeight: 'bold' }}>
-                                使用說明
-                            </Button>
-                            <Button component={Link} to='/charging' sx={{ color: currentRoute === '/charging' ? '#B5CC22' : '#467500', border: 'none', mr: 2, fontWeight: 'bold' }}>
-                                收費方式
-                            </Button>
-                            <Button component={Link} to='/stop' sx={{ color: currentRoute === '/stop' || currentRoute === '/page4' ? '#B5CC22' : '#467500', border: 'none', mr: 2, fontWeight: 'bold' }}>
-                                站點資訊
-                            </Button>
-                            <Button component={Link} to='/news' sx={{ color: currentRoute === '/news' ? '#B5CC22' : '#467500', border: 'none', mr: 2, fontWeight: 'bold' }}>
-                                最新消息
-                            </Button>
-                            <Button component={Link} to='/activity' sx={{ color: currentRoute === '/activity' ? '#B5CC22' : '#467500', border: 'none', fontWeight: 'bold' }}>
-                                活動專區
-                            </Button>
-                            <Box sx={{ flexGrow: 1 }}></Box>
-                            <Button
-                                variant="outlined"
-                                sx={{
-                                    borderColor: '#B5CC22',
-                                    color: 'white',
-                                    backgroundColor: '#B5CC22',
-                                    borderRadius: '20px'
-                                }}
-                                component={Link} to='/login'
-                            >
-                                登入
-                            </Button>
-                        </Hidden>
-                        <Hidden mdUp>
-                            <Box sx={{ flexGrow: 1 }}></Box>
-                            <Button onClick={handleClick}>
-                                <DehazeIcon sx={{ color: '#B5CC22' }} />
-                            </Button>
-                            <Drawer
-                                anchor="right"
-                                open={menuOpen}
-                                onClose={handleClick}
-                                PaperProps={{
-                                    style: {
-                                        width: '100%',
-                                        height: '100vh',
-                                        backgroundColor: '#B5CC22'
-                                    }
-                                }}
-                            >
-                                <Toolbar sx={{ background: 'white' }}>
-                                    <img src={'/logo.png'} alt="Logo" style={{ height: 83 }} />
-                                    <Box sx={{ flexGrow: 1 }}></Box>
-                                    <Button onClick={handleClick}>
-                                        <CloseIcon sx={{ color: '#B5CC22' }} />
-                                    </Button>
-                                </Toolbar>
-                                <List>
-                                    <ListItem onClick={handleClick}>
-                                        <Link to='/instructions' style={{ textDecoration: 'none' }}>
-                                            <ListItemText primary="使用說明" sx={{ color: currentRoute === '/instructions' ? '#467500' : 'white' }} />
-                                        </Link>
-                                    </ListItem>
-                                    <ListItem onClick={handleClick}>
-                                        <Link to='/charging' style={{ textDecoration: 'none' }}>
-                                            <ListItemText primary="收費方式" sx={{ color: currentRoute === '/charging' ? '#467500' : 'white' }} />
-                                        </Link>
-                                    </ListItem>
-                                    <ListItem onClick={handleClick}>
-                                        <Link to='/stop' style={{ textDecoration: 'none' }}>
-                                            <ListItemText primary="站點資訊" sx={{ color: currentRoute === '/stop' || currentRoute === '/page4' ? '#467500' : 'white' }} />
-                                        </Link>
-                                    </ListItem>
-                                    <ListItem onClick={handleClick}>
-                                        <Link to='/news' style={{ textDecoration: 'none' }}>
-                                            <ListItemText primary="最新消息" sx={{ color: currentRoute === '/news' ? '#467500' : 'white' }} />
-                                        </Link>
-                                    </ListItem>
-                                    <ListItem onClick={handleClick}>
-                                        <Link to='/activity' style={{ textDecoration: 'none' }}>
-                                            <ListItemText primary="活動專區" sx={{ color: currentRoute === '/activity' ? '#467500' : 'white' }} />
-                                        </Link>
-                                    </ListItem>
-                                </List>
-                                <Box sx={{ flexGrow: 1 }}></Box>
-                                <List sx={{ marginBottom: '5%' }}>
-                                    <ListItem onClick={handleClick}>
-                                        <Button
-                                            variant="outlined"
-                                            sx={{
-                                                borderColor: 'white',
-                                                color: '#82D900',
-                                                backgroundColor: 'white',
-                                                borderRadius: '20px'
-                                            }}
-                                        >
-                                            登入
-                                        </Button>
-                                    </ListItem>
-                                </List>
-                            </Drawer>
-                        </Hidden>
-                    </Toolbar>
-                </AppBar>
-            </Box>
-
+        <Box>
             <Box border={1} height={1} color={'#2222'} />
 
             <Box height={80} display="flex" alignItems="center" marginLeft={4}>
@@ -205,7 +83,7 @@ export default function Page4({ data }: Props) {
                     站點資訊
                 </Typography>
             </Box>
-            
+
             <Container maxWidth="sm" sx={{ display: 'flex', justifyContent: 'flex-start', marginLeft: 0 }}>
                 <Grid container spacing={2}>
                     <Grid item xs={12} md={6} height={70} sx={{ width: { xs: '100%', md: '400px' } }}>
@@ -222,7 +100,7 @@ export default function Page4({ data }: Props) {
                     </Grid>
                     <Grid item xs={12} md={5} sx={{ width: { xs: '100%', md: '400px' } }}>
                         <Autocomplete sx={{ marginRight: 0, paddingRight: 0, marginTop: 1, marginLeft: 1, background: '#2222', maxWidth: '242px' }}
-                            disablePortal options={taiwan} value={selectArea} isOptionEqualToValue={(option, value) => value === "" || option === value} 
+                            disablePortal options={taiwan} value={selectArea} isOptionEqualToValue={(option, value) => value === "" || option === value}
                             renderInput={(params) =>
                                 <TextField
                                     {...params}
@@ -268,7 +146,7 @@ export default function Page4({ data }: Props) {
                 </Hidden>
             </Grid>
 
-            <Grid container spacing={5} sx={{ marginTop: 2, marginLeft: 1, paddingRight: 7 }}>
+            <Grid container spacing={5} sx={{ marginTop: 2, marginLeft: 1, marginBottom: 5, paddingRight: 7 }}>
                 <Grid item xs={3} md={2} sx={{ ...gridTitle, ...topLeft, color: 'white' }}>
                     縣市
                 </Grid>
@@ -343,7 +221,34 @@ export default function Page4({ data }: Props) {
                     </Fragment>
                 ))}
             </Grid>
-            <Box sx={{ height: 50 }}></Box>
+            <Container sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                    <Button 
+                        size='large' 
+                        sx={{
+                            background: '#B5CC22',
+                            borderColor: '#B5CC22',
+                            color: 'white', 
+                            marginRight: 1, 
+                            '&:hover':{ 
+                                background: '#467500'
+                            }}}
+                    >
+                        上一頁
+                    </Button>
+                    <Button 
+                        size='large' 
+                        sx={{
+                            background: '#B5CC22', 
+                            borderColor: '#B5CC22',
+                            color: 'white', 
+                            marginLeft: 1, 
+                            '&:hover':{ 
+                                background: '#467500'
+                            }}}
+                    >
+                        下一頁
+                    </Button>
+            </Container>
         </Box>
     )
 }
