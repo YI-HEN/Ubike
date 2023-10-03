@@ -1,7 +1,7 @@
+import React from "react";
 import { Box } from "@mui/material";
 import NavBar from "./NavBar";
 import { Outlet } from "react-router-dom";
-import { Ubike } from "../models/ubike";
 
 interface Props {
     handleClick: () => void;

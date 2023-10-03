@@ -3,30 +3,96 @@ import { Ubike } from '../models/ubike';
 import { Autocomplete, Box, Button, Checkbox, Container, FormControl, FormControlLabel, Grid, Hidden, IconButton, InputLabel, MenuItem, Select, SelectChangeEvent, TextField, Typography } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import CancelIcon from '@mui/icons-material/Cancel';
+import { taiwan } from '../models/taiwan';
+import { taipei, newTaipei, hsinchuCo, hsinchuCi, miaoli, taichung, chiayi, tainan, kaohsiung, pingtung } from '../models/city';
+import agent from '../api/agent';
 
 
-
-interface Props {
-    data: Ubike[];
-}
-
-export default function Stop({ data }: Props) {
-    const taipei = ["松山區", "大安區", "大同區", "中山區", "內湖區", "南港區",
-        "士林區", "北投區", "信義區", "中正區", "萬華區", "文山區", "臺大公館校區"]
-    const taiwan = ['臺北市', '新北市', '桃園市', '臺中市', '臺南市', '高雄市',
-        '新竹縣', '苗栗縣', '彰化縣', '南投縣', '雲林縣', '嘉義縣', '屏東縣', '宜蘭縣',
-        '花蓮縣', '臺東縣', '澎湖縣', '金門縣', '連江縣', '基隆市', '新竹市', '嘉義市']
-    const [menuOpen, setMenuOpen] = useState<boolean>(false);
-    const [selectAll, setSelectAll] = useState<boolean>(false);
-    const [selectArea, setSelectArea] = useState<string>("");
-    const [selectTown, setSelectTown] = useState<boolean[]>(Array(taipei.length).fill(false));
-    const [newData, setNewData] = useState<any[]>([]);
+export default function Stop() {
+    const [data, setData] = useState<any[]>([]);
+    const [selectAll, setSelectAll] = useState<boolean>(false); //選擇全部的checkbox
+    const [selectArea, setSelectArea] = useState<string>(""); //台灣縣市
+    const [newData, setNewData] = useState<Ubike[]>([]); //勾選的縣市
+    const [newCity, setNewCity] = useState<string[]>([]); //獲取縣市區
+    const [selectTown, setSelectTown] = useState<boolean[]>([]); //checkbox
+    const [page, setPage] = useState<number>(0); //頁數控制
 
     useEffect(() => {
-        const newSelectedDistricts = taipei.filter((_, index) => selectTown[index]);
+        const newSelectedDistricts = newCity.filter((_, index) => selectTown[index]);
         const updateData = data.filter(item => newSelectedDistricts.includes(item.sarea));
         setNewData(updateData);
-    }, [selectTown]);
+        setPage(0);
+    }, [selectTown, data]); //勾選單區的控制
+    useEffect(() => {
+        switch (selectArea) {
+            case '臺北市':
+                setNewCity(taipei);
+                setSelectTown(Array(taipei.length).fill(false));
+                setSelectAll(false);
+                agent.taipei().then(response => {
+                    setData(response);
+                })
+                break;
+            case '新北市':
+                setNewCity(newTaipei);
+                setSelectTown(Array(newTaipei.length).fill(false));
+                setSelectAll(false);
+                agent.newTaipei().then(response => {
+                    setData(response);
+                })
+                break;
+            case '新竹縣':
+                setNewCity(hsinchuCo);
+                setSelectTown(Array(hsinchuCo.length).fill(false));
+                setSelectAll(false);
+                break;
+            case '新竹市':
+                setNewCity(hsinchuCi);
+                setSelectTown(Array(hsinchuCi.length).fill(false));
+                setSelectAll(false);
+                break;
+            case '苗栗縣':
+                setNewCity(miaoli);
+                setSelectTown(Array(miaoli.length).fill(false));
+                setSelectAll(false);
+                break;
+            case '臺中市':
+                setNewCity(taichung);
+                setSelectTown(Array(taichung.length).fill(false));
+                setSelectAll(false);
+                break;
+            case '嘉義縣':
+                setNewCity(chiayi);
+                setSelectTown(Array(chiayi.length).fill(false));
+                setSelectAll(false);
+                break;
+            case '台南市':
+                setNewCity(tainan);
+                setSelectTown(Array(tainan.length).fill(false));
+                setSelectAll(false);
+                break;
+            case '高雄市':
+                setNewCity(kaohsiung);
+                setSelectTown(Array(kaohsiung.length).fill(false));
+                setSelectAll(false);
+                agent.kaohsiung().then(response => {
+                    setData(response);
+                });                
+                break;
+            case '屏東縣':
+                setNewCity(pingtung);
+                setSelectTown(Array(pingtung.length).fill(false));
+                setSelectAll(false);
+                break;
+            default:
+                setNewCity([]);
+                setSelectTown([]);
+                setSelectAll(false);
+                break;
+        }
+    }, [selectArea])
+
+
 
     const handleChange = (event: SelectChangeEvent<typeof selectArea>) => {
         setSelectArea(event.target.value);
@@ -37,7 +103,7 @@ export default function Stop({ data }: Props) {
     const handleSelectAllTown = () => {
         const newSelectAll = !selectAll;
         setSelectAll(newSelectAll);
-        setSelectTown(Array(taipei.length).fill(newSelectAll));
+        setSelectTown(Array(newCity.length).fill(newSelectAll));
     }
     const handleSelectSingleTown = (event: React.MouseEvent<HTMLButtonElement>, index: number) => {
         const newSelectTown = [...selectTown];
@@ -47,7 +113,16 @@ export default function Stop({ data }: Props) {
             setSelectAll(false);
         }
     }
+    const handlePage = (change: boolean) => {
+        if(change){
+            setPage(page+1);
+        }else{
+            setPage(page-1);
+        }
+    }
 
+
+ //#region  CSS樣式
     const topLeft = {
         borderTopLeftRadius: '40px'
     }
@@ -73,6 +148,8 @@ export default function Stop({ data }: Props) {
         alignItems: 'center',
         justifyContent: 'center'
     }
+//#endregion
+
 
     return (
         <Box>
@@ -130,7 +207,7 @@ export default function Stop({ data }: Props) {
                 <Grid item xs={12} md={5} marginLeft={5}>
                     <FormControlLabel control={<Checkbox checked={selectAll} color='success' onClick={handleSelectAllTown} />} label="全部勾選" />
                     <Box>
-                        {selectArea == '臺北市' && taipei.map((area, index) => (
+                        {selectArea!! && newCity.map((area, index) => (
                             <FormControlLabel key={index} control={
                                 <Checkbox checked={selectTown[index]} color='success'
                                     onClick={(event: React.MouseEvent<HTMLButtonElement>) => handleSelectSingleTown(event, index)}
@@ -170,15 +247,12 @@ export default function Stop({ data }: Props) {
                         <span>空位</span>
                     </Grid>
                 </Hidden>
-                {selectArea == '臺北市' && newData.slice(0, 5).map((one, index) => (
+                {selectArea!! && newData.slice(5*page, 5*(page+1)).map((one, index) => (
                     <Fragment key={index + "$"}>
                         {index % 2 !== 0
                             ?
                             <>
-                                {taipei.includes(one.sarea)
-                                    ? <Grid item xs={3} md={2} sx={{ ...gridItem, background: '#1111' }}>台北市</Grid>
-                                    : <Grid item xs={3} md={2} sx={{ ...gridItem, background: '#1111' }}>其他</Grid>
-                                }
+                                <Grid item xs={3} md={2} sx={{ ...gridItem, background: '#1111' }}>{selectArea}</Grid>
                                 <Grid item xs={3} md={2} sx={{ ...gridItem, background: '#1111' }}>{one.sarea}</Grid>
                                 <Grid item xs={6} md={6} sx={{ ...gridItem, background: '#1111', justifyContent: 'flex-start' }}>{one.ar}</Grid>
                                 <Hidden mdDown>
@@ -190,10 +264,10 @@ export default function Stop({ data }: Props) {
                                 {taipei.includes(one.sarea)
                                     ?
                                     (index == 4
-                                        ? <Grid item xs={3} md={2} sx={{ ...gridItem, ...bottomLeft }}>台北市</Grid>
-                                        : <Grid item xs={3} md={2} sx={gridItem}>台北市</Grid>
+                                        ? <Grid item xs={3} md={2} sx={{ ...gridItem, ...bottomLeft }}>{selectArea}</Grid>
+                                        : <Grid item xs={3} md={2} sx={gridItem}>{selectArea}</Grid>
                                     )
-                                    : <Grid item xs={3} md={2} sx={gridItem}>其他</Grid>
+                                    : <Grid item xs={3} md={2} sx={gridItem}>{selectArea}</Grid>
                                 }
                                 <Grid item xs={3} md={2} sx={gridItem}>{one.sarea}</Grid>
                                 {index == 4
@@ -221,33 +295,39 @@ export default function Stop({ data }: Props) {
                     </Fragment>
                 ))}
             </Grid>
-            <Container sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                    <Button 
-                        size='large' 
-                        sx={{
-                            background: '#B5CC22',
-                            borderColor: '#B5CC22',
-                            color: 'white', 
-                            marginRight: 1, 
-                            '&:hover':{ 
-                                background: '#467500'
-                            }}}
-                    >
-                        上一頁
-                    </Button>
-                    <Button 
-                        size='large' 
-                        sx={{
-                            background: '#B5CC22', 
-                            borderColor: '#B5CC22',
-                            color: 'white', 
-                            marginLeft: 1, 
-                            '&:hover':{ 
-                                background: '#467500'
-                            }}}
-                    >
-                        下一頁
-                    </Button>
+            <Container sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Button
+                    size='large'
+                    sx={{
+                        background: '#B5CC22',
+                        borderColor: '#B5CC22',
+                        color: 'white',
+                        marginRight: 1,
+                        '&:hover': {
+                            background: '#467500'
+                        }
+                    }}
+                    onClick={() => handlePage(false)}
+                    disabled = {page === 0}
+                >
+                    上一頁
+                </Button>
+                <Button
+                    size='large'
+                    sx={{
+                        background: '#B5CC22',
+                        borderColor: '#B5CC22',
+                        color: 'white',
+                        marginLeft: 1,
+                        '&:hover': {
+                            background: '#467500'
+                        }
+                    }}
+                    onClick={() => handlePage(true)}
+                    disabled = {page >= (Number((newData.length/5).toFixed(0))-1)}
+                >
+                    下一頁
+                </Button>
             </Container>
         </Box>
     )
